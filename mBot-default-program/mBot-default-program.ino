@@ -101,6 +101,7 @@ unsigned char prevc=0;
 boolean buttonPressed = false;
 double lastTime = 0.0;
 double currentTime = 0.0;
+int LineFollowFlag=0;
 
 #define VERSION 0
 #define ULTRASONIC_SENSOR 1
@@ -356,18 +357,18 @@ void Forward()
 }
 void Backward()
 {
-  MotorL.run(moveSpeed);
+  MotorL.run(moveSpeed); 
   MotorR.run(-moveSpeed);
 }
 void TurnLeft()
 {
-  MotorL.run(70 + moveSpeed / 5);
-  MotorR.run(70 + moveSpeed / 5);
+  MotorL.run(-moveSpeed/10);
+  MotorR.run(moveSpeed);
 }
 void TurnRight()
 {
-  MotorL.run(-(70 + moveSpeed / 5));
-  MotorR.run(-(70 + moveSpeed / 5));
+  MotorL.run(-moveSpeed);
+  MotorR.run(moveSpeed/10);
 }
 void Stop()
 {
@@ -424,15 +425,18 @@ void modeB()
     {
       case 0:
         TurnLeft();
+        delay(200);
         break;
       case 1:
         TurnRight();
+        delay(200);
         break;
     }
   }
   else
   {
     Backward();
+    delay(400);
   }
   delay(100);
 }
@@ -446,18 +450,23 @@ void modeC()
   {
     case S1_IN_S2_IN:
       Forward();
+      LineFollowFlag=10;
       break;
 
     case S1_IN_S2_OUT:
-      TurnLeft();
+       Forward();
+      if (LineFollowFlag>1) LineFollowFlag--;
       break;
 
     case S1_OUT_S2_IN:
-      TurnRight();
+      Forward();
+      if (LineFollowFlag<20) LineFollowFlag++;
       break;
 
     case S1_OUT_S2_OUT:
-      Backward();
+      if(LineFollowFlag==10) Backward();
+      if(LineFollowFlag<10) TurnLeft();
+      if(LineFollowFlag>10) TurnRight();
       break;
   }
 //  delay(50);
